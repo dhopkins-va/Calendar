@@ -21,6 +21,11 @@ env/
 *.swp
 *.swo
 
+# Generated data
+categories.json
+goals.json
+snapshots/
+
 # OS
 .DS_Store
 Thumbs.db

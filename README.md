@@ -48,6 +48,42 @@ python calendar_analyzer.py --all-calendars
 
 On first run, a browser window opens for Google OAuth. After that, your token is cached in `token.json`.
 
+## Snapshots and diffing
+
+Save snapshots over time and diff them to answer "what changed since last time?"
+
+```bash
+# Save a snapshot of the current analysis
+python calendar_analyzer.py --save
+python calendar_analyzer.py --save "week-of-feb-24"
+
+# List all saved snapshots
+python calendar_analyzer.py --list-snapshots
+
+# Diff current calendar vs most recent snapshot
+python calendar_analyzer.py --diff
+
+# Diff current calendar vs a specific snapshot
+python calendar_analyzer.py --diff snapshots/20260220_143000.json
+
+# Diff two specific snapshots against each other
+python calendar_analyzer.py --diff snapshots/20260213.json snapshots/20260220.json
+```
+
+The diff report shows changes in total hours, per-category shifts, day-of-week changes, and whether your pending invite count improved or worsened.
+
+## Daily and weekly reviews
+
+```bash
+# Daily review: what's on for tomorrow + pending invites to act on
+python calendar_analyzer.py daily
+
+# Weekly review: last week vs goals + plan for the week ahead
+python calendar_analyzer.py weekly
+```
+
+See [Daily and weekly review commands](#daily-and-weekly-review-commands) below for details.
+
 ## Customizing categories
 
 On first run, a `categories.json` file is created with default categories. Edit it to match your actual meeting types:
@@ -104,6 +140,44 @@ You have 5 event(s) without an explicit accept/decline.
                     https://calendar.google.com/...
 ```
 
+## Daily and weekly review commands
+
+### `daily` — "What's on for tomorrow?"
+
+Shows tomorrow's schedule with pending invites highlighted. Designed to run at the end of each workday.
+
+- Lists every event for tomorrow in chronological order
+- Flags events you haven't accepted/declined so you can respond before the day starts
+- Shows total meeting hours and free blocks
+
+### `weekly` — "How did last week go? How should I adjust?"
+
+Compares last week against your time goals and previews the week ahead. Designed to run on Monday morning (or Friday afternoon).
+
+- Shows last week's time breakdown vs your goals (set in `goals.json`)
+- Highlights where you're over/under your target allocation
+- Auto-saves a snapshot so you can track trends over time
+- Previews the coming week's load
+
+### Setting time goals
+
+Create a `goals.json` to define your ideal time allocation:
+
+```json
+{
+  "total_meeting_hours_per_week": 20,
+  "category_targets": {
+    "1:1": 5,
+    "Team meetings": 4,
+    "Focus time": 8,
+    "External": 2,
+    "Interview": 1
+  }
+}
+```
+
+The weekly review will compare actual hours against these targets.
+
 ## Files
 
 | File | Purpose |
@@ -113,4 +187,10 @@ You have 5 event(s) without an explicit accept/decline.
 | `fetch_events.py` | Fetch and normalize calendar events |
 | `analyze.py` | Categorize events and compute time breakdowns |
 | `pending_invites.py` | Detect unanswered invites |
+| `snapshots_store.py` | Save/load analysis snapshots |
+| `diff_snapshots.py` | Compare two snapshots and produce a diff report |
+| `daily_review.py` | Daily "what's on tomorrow" review |
+| `weekly_review.py` | Weekly retrospective and planning review |
 | `categories.json` | Customizable event categories (auto-created on first run) |
+| `goals.json` | Your ideal time allocation targets |
+| `snapshots/` | Saved analysis snapshots (gitignored) |
